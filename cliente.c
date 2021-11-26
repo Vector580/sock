@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define PORT 22001
+#define PORT 22000
 void xprintf(int socket,int salto);
 void xscanf(int socket);
 int main(){
@@ -18,6 +18,7 @@ int main(){
 	char cadena[200];
 	char captcha[6];
 	char resp[2];
+	char ncliente[2];
 
 
 	clientSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -42,7 +43,6 @@ int main(){
 	//Se recibe mensaje y proporcione su nombre
 	xprintf(clientSocket,1);
 	xscanf(clientSocket);
-
 
 	//se pregunta por la validacion captcha
 	xprintf(clientSocket,0);

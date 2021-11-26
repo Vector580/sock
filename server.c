@@ -7,8 +7,10 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define PORT 22001
-void capt(int socket);
+#define PORT 22000
+
+void capt(int );
+void principal(int );
 int main(){
 	//Primer socket en llegar
 	int sockfd, ret;
@@ -66,26 +68,19 @@ int main(){
 		}
 		//Se muestra que se logro la conexion
 		printf("Connection accepted from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
- 
+
 		//Esta parte aun no la entiendo pero se que nos permitira tener varios clientes a la ves
-		if((hijo = fork()) == 0){
-			close(sockfd);
-			recv(newSocket, nombre, 25, 0);
-			bzero(buffer, sizeof(buffer));
-			capt(newSocket);
-			send(newSocket, "\nVerificacion correcta", 200, 0);
-			send(newSocket, "\n¿Con que linea desea viajar? \n1.Linea Futura \n2.ADO \n3.Estrella Blanca", 200, 0);
-			send(newSocket, "\nSu respuesta: ", 100, 0);
-			recv(newSocket, buffer, 1, 0);
-			opcion=atoi(buffer);
-			switch(opcion){
-				case 1:send(newSocket,"\n Eligio Linea Futura",100,0);
-				break;
-			}
+		switch(hijo = fork())
+		{
+			case -1: printf("\nNo se pudo crear el proceso hijo");
+					 break;
+			case 0: principal(newSocket);
+					break;
+			default: close(newSocket);
+					 break;
 		}
 
 	}
-	close(newSocket);
 	return 0;
 }
 
@@ -105,14 +100,13 @@ void capt(int socket)
 	send(socket, cadena, 6, 0);
 	send(socket, "\nIngrese la cadena: ", 200, 0);
 	recv(socket, buffer, 6, 0);
-	//printf("%s y %s",buffer,cadena);
 	if(strcmp(buffer, cadena) != 0)
 	{
 		send(socket, "1", 1, 0);
 		while(strcmp(buffer, cadena) != 0){
 			bzero(buffer, sizeof(buffer));
 			send(socket, "\nError de verficacion", 200, 0);
-			send(socket, "Ingrese la cadena: ", 200, 0);
+			send(socket, "\nIngrese la cadena: ", 200, 0);
 			recv(socket, buffer, 6, 0);
 			if(strcmp(buffer, cadena) != 0)
 				send(socket, "1", 1, 0);
@@ -123,4 +117,25 @@ void capt(int socket)
 	else
 		send(socket, "0", 1, 0);
 	bzero(buffer, sizeof(buffer));
+}
+
+void principal(int socket)
+{
+	char nombres[50][50];
+	char buffer[1024];
+	int opc;
+	recv(socket, nombres[0], 25, 0);
+	bzero(buffer, sizeof(buffer));
+	//Funcion del captcha
+	capt(socket);
+	send(socket, "\nVerificacion correcta", 200, 0);
+	send(socket, "\n¿Con que linea desea viajar? \n1.Linea Futura \n2.ADO \n3.Estrella Blanca", 200, 0);
+	send(socket, "\nSu respuesta: ", 100, 0);
+	recv(socket, buffer, 1, 0);
+	opc=atoi(buffer);
+	switch(opc){
+		case 1: send(socket,"\n Eligio Linea Futura",100,0);
+				break;
+	}
+	close(socket);
 }
