@@ -7,8 +7,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define PORT 22009
-
+#define PORT 22000
+void capt(int socket);
 int main(){
 	//Primer socket en llegar
 	int sockfd, ret;
@@ -59,42 +59,23 @@ int main(){
 		//Se solicita la conexion
 		newSocket = accept(sockfd, (struct sockaddr*)&newAddr, &addr_size);
 		//Se manda mensaje de bienvenida
-		send(newSocket/*socket a donde se manda el mensaje*/, "BIENVENIDO AL PROGRMA DE VENTA DE BOLETOS DE UNA CENTRAL DE AUTOBUSES\n Ingresa tu nombre: "/*Mensaje*/, 200/*Tamano de mensaje*/, 0/*Permisos*/);
+		send(newSocket, "BIENVENIDO AL PROGRAMA DE VENTA DE BOLETOS DE UNA CENTRAL DE AUTOBUSES\n Ingresa tu nombre: ", 200, 0);
 		//send(newSocket/*socket a donde se manda el mensaje*/, "BIENVENIDO AL PROGRMA DE VENTA DE BOLETOS DE UNA CENTRAL DE AUTOBUSES\n Ingresa tu nombre: "/*Mensaje*/, strlen(cadena)/*Tamano de mensaje*/, 0/*Permisos*/);
 		if(newSocket < 0){
 			exit(1);
 		}
 		//Se muestra que se logro la conexion
 		printf("Connection accepted from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
-
+ 
 		//Esta parte aun no la entiendo pero se que nos permitira tener varios clientes a la ves
 		if((hijo = fork()) == 0){
 			close(sockfd);
-
-				recv(newSocket, nombre, 25, 0);
-				bzero(buffer, sizeof(buffer));
-
-			captcha[0]='A'+(rand()%26);
-			captcha[1]='A'+(rand()%26);
-			captcha[2]='A'+(rand()%26);
-			captcha[3]='a'+(rand()%26);
-			captcha[4]='0'+(rand()%10);
-			captcha[5]='0'+(rand()%10);
-			strcpy(cadena,captcha);
-			
-			send(newSocket/*socket a donde se manda el mensaje*/, cadena/*Mensaje*/, 6/*Tamano de mensaje*/, 0/*Permisos*/);
-			recv(newSocket, buffer, 6, 0);
-
-			while(strcmp(buffer, cadena) != 0){
-				bzero(buffer, sizeof(buffer));
-				send(newSocket/*socket a donde se manda el mensaje*/, "\nError de verficacion"/*Mensaje*/"", 200/*Tamano de mensaje*/, 0/*Permisos*/);
-				recv(newSocket, buffer, 6, 0);
-				
-			}
+			recv(newSocket, nombre, 25, 0);
 			bzero(buffer, sizeof(buffer));
-			send(newSocket/*socket a donde se manda el mensaje*/, "\nVerificacio correcta"/*Mensaje*/"", 200/*Tamano de mensaje*/, 0/*Permisos*/);
-
-			send(newSocket/*socket a donde se manda el mensaje*/, "\n¿Con que linea desea viajar? \n1.Linea Futura \n2.ADO \n3.Estrella Blanca"/*Mensaje*/"", 200/*Tamano de mensaje*/, 0/*Permisos*/);
+			capt(newSocket);
+			send(newSocket, "\nVerificacion correcta", 200, 0);
+			send(newSocket, "\n¿Con que linea desea viajar? \n1.Linea Futura \n2.ADO \n3.Estrella Blanca", 200, 0);
+			send(newSocket, "\nSu respuesta: ", 100, 0);
 			recv(newSocket, buffer, 1, 0);
 			opcion=atoi(buffer);
 			switch(opcion){
@@ -106,4 +87,39 @@ int main(){
 	}
 	close(newSocket);
 	return 0;
+}
+
+void capt(int socket)
+{
+	char buffer[1024];
+	char cadena[100];
+	char captcha[7];
+	captcha[0]='A'+(rand()%26);
+	captcha[1]='A'+(rand()%26);
+	captcha[2]='A'+(rand()%26);
+	captcha[3]='a'+(rand()%26);
+	captcha[4]='0'+(rand()%10);
+	captcha[5]='0'+(rand()%10);
+	strcpy(cadena,captcha);
+	send(socket, "Verifique que no es un robot ", 200, 0);
+	send(socket, cadena, 6, 0);
+	send(socket, "\nIngrese la cadena: ", 200, 0);
+	recv(socket, buffer, 6, 0);
+	if(strcmp(buffer, cadena) != 0)
+	{
+		send(socket, "1", 1, 0);
+		while(strcmp(buffer, cadena) != 0){
+			bzero(buffer, sizeof(buffer));
+			send(socket, "\nError de verficacion", 200, 0);
+			send(socket, "\nIngrese la cadena: ", 200, 0);
+			recv(socket, buffer, 6, 0);
+			if(strcmp(buffer, cadena) != 0)
+				send(socket, "1", 1, 0);
+			else
+				send(socket, "0", 1, 0);
+		}
+	}
+	else
+		send(socket, "0", 1, 0);
+	bzero(buffer, sizeof(buffer));
 }
