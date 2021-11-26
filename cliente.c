@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define PORT 22000
+#define PORT 22001
 void xprintf(int socket,int salto);
 void xscanf(int socket);
 int main(){
@@ -85,7 +85,6 @@ void xprintf(int socket,int salto)
 	}
 	bzero(cadena, sizeof(cadena));
 }
-
 
 void xscanf(int socket)
 {
