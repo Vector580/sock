@@ -86,6 +86,7 @@ void xprintf(int socket,int salto)
 	bzero(cadena, sizeof(cadena));
 }
 
+
 void xscanf(int socket)
 {
 	char buffer[1024];
