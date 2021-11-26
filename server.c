@@ -1,14 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
-#define PORT 22000
-void capt(int socket);
 int main(){
 	//Primer socket en llegar
 	int sockfd, ret;
@@ -105,6 +94,7 @@ void capt(int socket)
 	send(socket, cadena, 6, 0);
 	send(socket, "\nIngrese la cadena: ", 200, 0);
 	recv(socket, buffer, 6, 0);
+	printf("%s y %s",buffer,cadena);
 	if(strcmp(buffer, cadena) != 0)
 	{
 		send(socket, "1", 1, 0);
